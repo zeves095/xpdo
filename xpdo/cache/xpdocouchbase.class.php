@@ -41,7 +41,7 @@ class xPDOCouchBase extends xPDOCache {
 
             $this->couchbase = new CouchbaseCluster($dsn, $username, $password);
             $bucketName = $this->getOption($this->key . '_couchbase_bucket', $options, $this->key);
-            $this->bucket = $this->couchbase->openBucket($this->bucket, $this->getOption($this->key . '_couchbase_bucket_password', $options, ''));
+            $this->bucket = $this->couchbase->openBucket($bucketName, $this->getOption($this->key . '_couchbase_bucket_password', $options, ''));
             if ($this->bucket instanceof CouchbaseBucket) {
                 $this->initialized = true;
             } else {
