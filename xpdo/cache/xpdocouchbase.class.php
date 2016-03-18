@@ -44,6 +44,11 @@ class xPDOCouchBase extends xPDOCache {
             $this->bucket = $this->couchbase->openBucket($bucketName, $this->getOption($this->key . '_couchbase_bucket_password', $options, ''));
             if ($this->bucket instanceof CouchbaseBucket) {
                 $this->initialized = true;
+                $this->bucket->setTranscoder(function($value) {
+                    return array(json_encode($value), 0, 0);
+                }, function($value, $flags, $datatype) {
+                    return json_decode($value, true);
+                });
             } else {
                 $this->couchbase = null;
                 $this->bucket = null;
@@ -109,11 +114,7 @@ class xPDOCouchBase extends xPDOCache {
 
     public function get($key, $options= array()) {
         try {
-            $result = $this->bucket->get($this->getCacheKey($key), $options)->value;
-            if ($result instanceof stdClass) {
-                $result = get_object_vars($result);
-            }
-            return $result;
+            return $this->bucket->get($this->getCacheKey($key), $options)->value;
         } catch (Exception $e) {}
         return null;
     }
