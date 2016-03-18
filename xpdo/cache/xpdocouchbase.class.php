@@ -67,6 +67,7 @@ class xPDOCouchBase extends xPDOCache {
             $this->bucket->insert($this->getCacheKey($key), $var, $options);
             return true;
         } catch (Exception $e) {
+            $this->xpdo->log(xPDO::LOG_LEVEL_ERROR, "xPDOCouchBase[{$this->key}]: Error adding cache item with key {$key}. {$e->getMessage()}");
         }
         return false;
     }
@@ -79,6 +80,7 @@ class xPDOCouchBase extends xPDOCache {
             $this->bucket->upsert($this->getCacheKey($key), $var, $options);
             return true;
         } catch (Exception $e) {
+            $this->xpdo->log(xPDO::LOG_LEVEL_ERROR, "xPDOCouchBase[{$this->key}]: Error setting cache item with key {$key}. {$e->getMessage()}");
         }
         return false;
     }
@@ -91,6 +93,7 @@ class xPDOCouchBase extends xPDOCache {
             $this->bucket->replace($this->getCacheKey($key), $var, $options);
             return true;
         } catch (Exception $e) {
+            $this->xpdo->log(xPDO::LOG_LEVEL_ERROR, "xPDOCouchBase[{$this->key}]: Error replacing cache item with key {$key}. {$e->getMessage()}");
         }
         return false;
     }
@@ -101,12 +104,14 @@ class xPDOCouchBase extends xPDOCache {
                 $this->bucket->remove($this->getCacheKey($key), $options);
                 return true;
             } catch (Exception $e) {
+                $this->xpdo->log(xPDO::LOG_LEVEL_ERROR, "xPDOCouchBase[{$this->key}]: Error deleting cache item with key {$key}. {$e->getMessage()}");
             }
         } else {
             try {
                 $this->bucket->manager()->flush();
                 return true;
             } catch (Exception $e) {
+                $this->xpdo->log(xPDO::LOG_LEVEL_ERROR, "xPDOCouchBase[{$this->key}]: Error flushing cache due to delete request for key {$key}. {$e->getMessage()}");
             }
         }
         return false;
@@ -115,7 +120,9 @@ class xPDOCouchBase extends xPDOCache {
     public function get($key, $options= array()) {
         try {
             return $this->bucket->get($this->getCacheKey($key), $options)->value;
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            $this->xpdo->log(xPDO::LOG_LEVEL_WARN, "xPDOCouchBase[{$this->key}]: Cache item with key {$key} does not exist. {$e->getMessage()}");
+        }
         return null;
     }
 
@@ -124,6 +131,7 @@ class xPDOCouchBase extends xPDOCache {
             $this->bucket->manager()->flush();
             return true;
         } catch (Exception $e) {
+            $this->xpdo->log(xPDO::LOG_LEVEL_ERROR, "xPDOCouchBase[{$this->key}]: Error flushing cache bucket. {$e->getMessage()}");
         }
         return false;
     }
