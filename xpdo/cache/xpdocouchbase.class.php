@@ -58,42 +58,72 @@ class xPDOCouchBase extends xPDOCache {
         if ($expire > 0) {
             $options['expiry'] = $expire;
         }
-        $added= $this->bucket->insert($this->getCacheKey($key), $var, $options);
-        return (bool)$added;
+        try {
+            $this->bucket->insert($this->getCacheKey($key), $var, $options);
+            return true;
+        } catch (Exception $e) {
+        }
+        return false;
     }
 
     public function set($key, $var, $expire= 0, $options= array()) {
         if ($expire > 0) {
             $options['expiry'] = $expire;
         }
-        $set= $this->bucket->upsert($this->getCacheKey($key), $var, $options);
-        return $set;
+        try {
+            $this->bucket->upsert($this->getCacheKey($key), $var, $options);
+            return true;
+        } catch (Exception $e) {
+        }
+        return false;
     }
 
     public function replace($key, $var, $expire= 0, $options= array()) {
         if ($expire > 0) {
             $options['expiry'] = $expire;
         }
-        $replaced= $this->bucket->replace($this->getCacheKey($key), $var, $options);
-        return $replaced;
+        try {
+            $this->bucket->replace($this->getCacheKey($key), $var, $options);
+            return true;
+        } catch (Exception $e) {
+        }
+        return false;
     }
 
     public function delete($key, $options= array()) {
         if (!isset($options['multiple_object_delete']) || empty($options['multiple_object_delete'])) {
-            $deleted= $this->bucket->remove($this->getCacheKey($key), $options);
+            try {
+                $this->bucket->remove($this->getCacheKey($key), $options);
+                return true;
+            } catch (Exception $e) {
+            }
         } else {
-            $this->bucket->manager()->flush();
-            $deleted = true;
+            try {
+                $this->bucket->manager()->flush();
+                return true;
+            } catch (Exception $e) {
+            }
         }
-        return $deleted;
+        return false;
     }
 
     public function get($key, $options= array()) {
-        return $this->bucket->get($this->getCacheKey($key), $options);
+        try {
+            $result = $this->bucket->get($this->getCacheKey($key), $options)->value;
+            if ($result instanceof stdClass) {
+                $result = get_object_vars($result);
+            }
+            return $result;
+        } catch (Exception $e) {}
+        return null;
     }
 
     public function flush($options= array()) {
-        $this->bucket->manager()->flush();
-        return true;
+        try {
+            $this->bucket->manager()->flush();
+            return true;
+        } catch (Exception $e) {
+        }
+        return false;
     }
 }
