@@ -44,11 +44,24 @@ class xPDOCouchBase extends xPDOCache {
             $this->bucket = $this->couchbase->openBucket($bucketName, $this->getOption($this->key . '_couchbase_bucket_password', $options, ''));
             if ($this->bucket instanceof CouchbaseBucket) {
                 $this->initialized = true;
-                $this->bucket->setTranscoder(function($value) {
-                    return array(json_encode($value), 0, 0);
-                }, function($value, $flags, $datatype) {
-                    return json_decode($value, true);
-                });
+                $bucketTranscoder = $this->getOption($this->key . '_couchbase_transcoder', $options, '');
+                ​
+                switch ($bucketTranscoder) {
+                    case 'string':
+                        $this->bucket->setTranscoder(function($value) {
+                            return array($value, 0, 0);
+                        }, function($value, $flags, $datatype) {
+                            return $value;
+                        });
+                        break;
+                    default:
+                        $this->bucket->setTranscoder(function($value) {
+                            return array(json_encode($value), 0, 0);
+                        }, function($value, $flags, $datatype) {
+                            return json_decode($value, true);
+                        });
+                        break;
+                }
             } else {
                 $this->couchbase = null;
                 $this->bucket = null;
