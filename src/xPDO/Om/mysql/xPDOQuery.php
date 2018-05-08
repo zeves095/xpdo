@@ -99,11 +99,19 @@ class xPDOQuery extends \xPDO\Om\xPDOQuery {
         if ($command == 'SELECT' && !empty ($this->query['groupby'])) {
             $groupby= reset($this->query['groupby']);
             $sql.= 'GROUP BY ';
-            $sql.= $this->xpdo->escape($groupby['column']);
+            if( !preg_match("/[^a-zA-Z0-9_]+/", $groupby['column'])){
+                $sql.= $this->xpdo->escape($groupby['column']);
+            }else{
+                $sql.= $groupby['column'];
+            }
             if ($groupby['direction']) $sql.= ' ' . $groupby['direction'];
             while ($groupby= next($this->query['groupby'])) {
                 $sql.= ', ';
-                $sql.= $this->xpdo->escape($groupby['column']);
+                if( !preg_match("/[^a-zA-Z0-9_]+/", $groupby['column'])){
+                    $sql.= $this->xpdo->escape($groupby['column']);
+                }else{
+                    $sql.= $groupby['column'];
+                }
                 if ($groupby['direction']) $sql.= ' ' . $groupby['direction'];
             }
             $sql.= ' ';
@@ -116,11 +124,19 @@ class xPDOQuery extends \xPDO\Om\xPDOQuery {
         if ($command == 'SELECT' && !empty ($this->query['sortby'])) {
             $sortby= reset($this->query['sortby']);
             $sql.= 'ORDER BY ';
-            $sql.= $this->xpdo->escape($sortby['column']);
+            if( !preg_match("/[^a-zA-Z0-9_]+/", $sortby['column'])){
+               $sql.= $this->xpdo->escape($sortby['column']);
+            }else{
+               $sql.= $sortby['column'];
+            }
             if ($sortby['direction']) $sql.= ' ' . $sortby['direction'];
             while ($sortby= next($this->query['sortby'])) {
                 $sql.= ', ';
-                $sql.= $this->xpdo->escape($sortby['column']);
+                if( !preg_match("/[^a-zA-Z0-9_]+/", $sortby['column'])){
+                   $sql.= $this->xpdo->escape($sortby['column']);
+                }else{
+                   $sql.= $sortby['column'];
+                }
                 if ($sortby['direction']) $sql.= ' ' . $sortby['direction'];
             }
             $sql.= ' ';
